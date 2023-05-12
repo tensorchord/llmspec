@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class LLMSpec(BaseModel):
     """
+    # TODO: docstring
     Example usage
     llm = LLM(text="你好")
     encoded = llm.encode()
@@ -24,11 +25,11 @@ class LLMSpec(BaseModel):
         return json.dumps(data)
 
     @staticmethod
-    def decode(data: str or bytes) -> "LLM":
+    def decode(data: str | bytes, encoding: str = "utf-8") -> "LLMSpec":
         if isinstance(data, bytes):
-            data = data.decode("utf-8")
+            data = data.decode(encoding)
         decoded_data = json.loads(data)
-        return LLM(**decoded_data)
+        return LLMSpec(**decoded_data)
 
     def to_model(self, name: str = "moss") -> str:
         if name.lower() == "moss":
