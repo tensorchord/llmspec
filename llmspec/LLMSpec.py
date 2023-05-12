@@ -1,7 +1,7 @@
 import json
 from pydantic import BaseModel
 
-class LLM(BaseModel):
+class LLMSpec(BaseModel):
     """
     Example usage
     llm = LLM(text="你好")
