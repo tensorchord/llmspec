@@ -2,9 +2,7 @@
 name = "llmspec"
 version = "0.1.0"
 description = "LLM unified interface"
-authors = [
-    { name = "TensorChord", email = "45612704+tddschn@users.noreply.github.com" },
-]
+authors = [{ name = "TensorChord", email = "modelz@tensorchord.ai" }]
 dependencies = []
 requires-python = ">=3.7"
 readme = "README.md"
