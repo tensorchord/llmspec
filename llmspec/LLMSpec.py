@@ -1,5 +1,7 @@
 import json
+
 from pydantic import BaseModel
+
 
 class LLMSpec(BaseModel):
     """
@@ -14,12 +16,11 @@ class LLMSpec(BaseModel):
     to_model = llm.to_model(name="moss")
     print(f"MOSS format: {to_model}")
     """
+
     text: str
 
     def encode(self) -> str:
-        data = {
-            "text": self.text
-        }
+        data = {"text": self.text}
         return json.dumps(data)
 
     @staticmethod

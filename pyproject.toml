@@ -1,9 +1,7 @@
 [tool.pdm]
 
 [tool.pdm.dev-dependencies]
-dev = [
-    "black>=23.3.0",
-]
+dev = ["black>=23.3.0"]
 [project]
 name = "llmspec"
 version = "0.1.0"
@@ -19,3 +17,27 @@ license = { text = "apache2" }
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
+
+[tool.isort]
+profile = "black"
+
+[tool.pylint.master]
+load-plugins = "pylint.extensions.docparams,pylint.extensions.docstyle,pylint.extensions.no_self_use"
+default-docstring-type = "google"
+ignore-paths = ["mosec/_version.py"]
+
+[tool.pylint.format]
+max-line-length = 88
+
+[tool.pylint.reports]
+output-format = "colorized"
+reports = "no"
+score = "yes"
+max-args = 7
+
+[tool.pylint.messages_control]
+disable = []
+
+
+[tool.pytest.ini_options]
+markers = ["arrow: mark a test requires 'pyarrow'"]
