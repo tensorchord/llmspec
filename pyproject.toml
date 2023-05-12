@@ -3,12 +3,12 @@ name = "llmspec"
 version = "0.1.0"
 description = "LLM unified interface"
 authors = [
-    { name = "Teddy Xinyuan Chen", email = "45612704+tddschn@users.noreply.github.com" },
+    { name = "TensorChord", email = "45612704+tddschn@users.noreply.github.com" },
 ]
 dependencies = []
 requires-python = ">=3.7"
 readme = "README.md"
-license = { text = "apache2" }
+license = { text = "Apache-2.0" }
 
 [build-system]
 requires = ["pdm-backend"]
