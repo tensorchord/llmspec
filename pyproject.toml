@@ -1,7 +1,3 @@
-[tool.pdm]
-
-[tool.pdm.dev-dependencies]
-dev = ["black>=23.3.0"]
 [project]
 name = "llmspec"
 version = "0.1.0"
@@ -18,26 +14,21 @@ license = { text = "apache2" }
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
-[tool.isort]
-profile = "black"
+[tool.pdm]
 
-[tool.pylint.master]
-load-plugins = "pylint.extensions.docparams,pylint.extensions.docstyle,pylint.extensions.no_self_use"
-default-docstring-type = "google"
-ignore-paths = ["mosec/_version.py"]
+[tool.pdm.dev-dependencies]
+lint = ["ruff>=0.0.252", "black>=23.1.0"]
+test = ["pytest>=7.2.1"]
+dev = ["ipython>=7.34.0", "ipykernel>=6.16.2"]
 
-[tool.pylint.format]
-max-line-length = 88
+[tool.pdm.scripts]
+black = "black --check modelz"
+ruff = "ruff check ."
+lint = { composite = ["black", "ruff"] }
 
-[tool.pylint.reports]
-output-format = "colorized"
-reports = "no"
-score = "yes"
-max-args = 7
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "B"]
 
-[tool.pylint.messages_control]
-disable = []
-
-
-[tool.pytest.ini_options]
-markers = ["arrow: mark a test requires 'pyarrow'"]
+[tool.black]
+line-length = 88
