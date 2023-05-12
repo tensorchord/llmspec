@@ -1,16 +1,20 @@
 [tool.pdm]
 
+[tool.pdm.dev-dependencies]
+dev = [
+    "black>=23.3.0",
+]
 [project]
 name = "llmspec"
 version = "0.1.0"
 description = "LLM unified interface"
 authors = [
-    {name = "Teddy Xinyuan Chen", email = "45612704+tddschn@users.noreply.github.com"},
+    { name = "Teddy Xinyuan Chen", email = "45612704+tddschn@users.noreply.github.com" },
 ]
 dependencies = []
-requires-python = ">=3.6"
+requires-python = ">=3.7"
 readme = "README.md"
-license = {text = "apache2"}
+license = { text = "apache2" }
 
 [build-system]
 requires = ["pdm-backend"]
