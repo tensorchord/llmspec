@@ -3,8 +3,10 @@ name = "llmspec"
 version = "0.1.0"
 description = "LLM unified interface"
 authors = [{ name = "TensorChord", email = "modelz@tensorchord.ai" }]
-dependencies = []
-requires-python = ">=3.7"
+dependencies = [
+    "msgspec>=0.15.0",
+]
+requires-python = ">=3.8"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 
