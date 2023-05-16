@@ -13,5 +13,4 @@ format:
 	@black ${PY_SOURCE}
 	@ruff check --fix .
 
-
 .PHONY: *
