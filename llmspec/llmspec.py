@@ -1,5 +1,43 @@
 import json
-from typing import Union
+from typing import Union, Optional
+from enum import Enum
+
+
+class Role(Enum):
+    """Chat roles."""
+
+    SYSTEM = "system"
+    USER = "user"
+    ASSISTANT = "assistant"
+
+    @classmethod
+    def values(cls):
+        return [item.value for item in cls]
+
+
+class ChatMessage:
+    """Unified chat message interface."""
+
+    def __init__(
+        self, content: str, role: Role = Role.USER, name: Optional[str] = None
+    ) -> None:
+        self.content = content
+        self.role = role
+        self.name = name
+
+        self.validate()
+
+    def validate(self):
+        if not self.content or not isinstance(self.content, str):
+            raise ValueError("content should be str with length > 0")
+        if self.role not in Role.values():
+            raise ValueError(f"role should be one of the {Role.values()}")
+
+    def dict(self):
+        msg = {"role": self.role, "content": self.content}
+        if self.name:
+            msg["name"] = self.name
+        return msg
 
 
 class LLMSpec:
