@@ -56,8 +56,17 @@ class ChatCompletionRequest(CompletionRequest):
     model: str
     messages: List[ChatMessage]
 
-    def history(self):
-        return (msg.content for msg in self.messages)
+    def to_model(self, model: str = "ChatGLM"):
+        if model.lower() == "chatglm":
+            return dict(
+                prompt=self.messages[-1].content,
+                history=[msg.content for msg in self.messages[:-1]],
+                max_length=self.max_tokens,
+                top_p=self.top_p,
+                temperature=self.temperature,
+            )
+        # return dict by default
+        return msgspec.structs.asdict(self)
 
 
 class ChatChoice(msgspec.Struct):

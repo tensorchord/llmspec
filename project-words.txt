@@ -1,2 +1,2 @@
 llmspec
-pydantic
+msgspec
