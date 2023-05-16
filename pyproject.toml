@@ -20,7 +20,7 @@ test = ["pytest>=7.2.1"]
 dev = ["ipython>=7.34.0", "ipykernel>=6.16.2"]
 
 [tool.pdm.scripts]
-black = "black --check modelz"
+black = "black --check llmspec"
 ruff = "ruff check ."
 lint = { composite = ["black", "ruff"] }
 
