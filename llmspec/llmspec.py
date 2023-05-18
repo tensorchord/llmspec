@@ -36,8 +36,10 @@ class CompletionRequest(msgspec.Struct, kw_only=True):
     stop: Optional[str] = None
     presence_penalty: float = 0.0
     frequency_penalty: float = 0.0
+    repetition_penalty: float = 0.0
     logit_bias: Optional[Dict] = None
     user: str = ""
+    sample: bool = False
 
     @classmethod
     def from_bytes(cls, buf: bytes):
@@ -65,6 +67,48 @@ class ChatCompletionRequest(CompletionRequest):
                 top_p=self.top_p,
                 temperature=self.temperature,
             )
+        elif model.lower() == "moss":
+            try:
+                from transformers import (
+                    AutoTokenizer,  # type: ignore
+                    AutoModelForCausalLM,
+                )
+            except ImportError as err:
+                raise ImportError(
+                    "Please install transformers with: pip install transformers"
+                ) from err
+            # Load the MOSS tokenizer and model
+            tokenizer = AutoTokenizer.from_pretrained(
+                "fnlp/moss-moon-003-sft", trust_remote_code=True
+            )
+            model = (
+                AutoModelForCausalLM.from_pretrained(
+                    "fnlp/moss-moon-003-sft", trust_remote_code=True
+                )
+                .half()
+                .cuda()
+            )
+            model = model.eval()  # type: ignore
+
+            # Create the MOSS query from the latest message content
+            query = "\n: " + self.messages[-1].content + "<eoh>\n:"
+
+            # Tokenize the query and move it to GPU
+            inputs = tokenizer(query, return_tensors="pt")
+            for k in inputs:
+                inputs[k] = inputs[k].cuda()
+
+            # MOSS model parameters
+            model_params = {
+                "do_sample": True,
+                "temperature": self.temperature,
+                "top_p": self.top_p,
+                "repetition_penalty": self.repetition_penalty,
+                "max_new_tokens": self.max_tokens,
+            }
+
+            return dict(model=model, inputs=inputs, model_params=model_params)
+
         # return dict by default
         return msgspec.structs.asdict(self)
 
