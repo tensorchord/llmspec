@@ -58,15 +58,10 @@ class ChatCompletionRequest(CompletionRequest):
     model: str
     messages: List[ChatMessage]
 
-    def to_model(self, model: str = "ChatGLM"):
+    def get_prompt(self, model: str = "ChatGLM"):
         if model.lower() == "chatglm":
-            return dict(
-                prompt=self.messages[-1].content,
-                history=[msg.content for msg in self.messages[:-1]],
-                max_length=self.max_tokens,
-                top_p=self.top_p,
-                temperature=self.temperature,
-            )
+            prompt = self.messages[-1].content
+            return prompt
         elif model.lower() == "moss":
             prompt = []
             for message in self.messages:
@@ -78,6 +73,20 @@ class ChatCompletionRequest(CompletionRequest):
                     message_prefix = ""
                 prompt.append(f"{message_prefix} {message.content}")
             prompt = "\n".join(prompt) + "\n<|MOSS|>:"
+        else:
+            raise ValueError(f"Model {model} not supported.")
+
+    def get_inference_args(self, model: str = "ChatGLM"):
+        if model.lower() == "chatglm":
+            return dict(
+                prompt=self.get_prompt(model=model),
+                history=[msg.content for msg in self.messages[:-1]],
+                max_length=self.max_tokens,
+                top_p=self.top_p,
+                temperature=self.temperature,
+            )
+        elif model.lower() == "moss":
+            prompt = self.get_prompt(model=model)
 
             # MOSS model parameters
             model_params = {
