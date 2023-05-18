@@ -39,7 +39,7 @@ class CompletionRequest(msgspec.Struct, kw_only=True):
     repetition_penalty: float = 0.0
     logit_bias: Optional[Dict] = None
     user: str = ""
-    sample: bool = False
+    do_sample: bool = False
 
     @classmethod
     def from_bytes(cls, buf: bytes):
