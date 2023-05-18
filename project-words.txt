@@ -1,2 +1,11 @@
+chatglm
+endoftext
+fnlp
 llmspec
+logit
+logprobs
 msgspec
+pypa
+PYPI
+pypi
+pytest

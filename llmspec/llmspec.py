@@ -1,5 +1,5 @@
 import json
-from typing import Union, Optional, Dict, List
+from typing import Any, Union, Optional, Dict, List
 from datetime import datetime
 from enum import Enum
 
@@ -40,6 +40,7 @@ class CompletionRequest(msgspec.Struct, kw_only=True):
     logit_bias: Optional[Dict] = None
     user: str = ""
     sample: bool = False
+    inputs: Any = None
 
     @classmethod
     def from_bytes(cls, buf: bytes):
@@ -68,46 +69,28 @@ class ChatCompletionRequest(CompletionRequest):
                 temperature=self.temperature,
             )
         elif model.lower() == "moss":
-            try:
-                from transformers import (
-                    AutoTokenizer,  # type: ignore
-                    AutoModelForCausalLM,
-                )
-            except ImportError as err:
-                raise ImportError(
-                    "Please install transformers with: pip install transformers"
-                ) from err
-            # Load the MOSS tokenizer and model
-            tokenizer = AutoTokenizer.from_pretrained(
-                "fnlp/moss-moon-003-sft", trust_remote_code=True
-            )
-            model = (
-                AutoModelForCausalLM.from_pretrained(
-                    "fnlp/moss-moon-003-sft", trust_remote_code=True
-                )
-                .half()
-                .cuda()
-            )
-            model = model.eval()  # type: ignore
-
-            # Create the MOSS query from the latest message content
-            query = "\n: " + self.messages[-1].content + "<eoh>\n:"
-
-            # Tokenize the query and move it to GPU
-            inputs = tokenizer(query, return_tensors="pt")
-            for k in inputs:
-                inputs[k] = inputs[k].cuda()
+            prompt = []
+            for message in self.messages:
+                if message.role == Role.USER:
+                    message_prefix = '<|Human|>'
+                elif message.role == Role.ASSISTANT:
+                    message_prefix = '<|MOSS|>'
+                else:
+                    message_prefix = ''
+                prompt.append(f"{message_prefix} {message.content}")
+            prompt = "\n".join(prompt) + '\n<|MOSS|>:'
 
             # MOSS model parameters
             model_params = {
-                "do_sample": True,
+                "inputs": prompt,
+                "do_sample": self.sample,
                 "temperature": self.temperature,
                 "top_p": self.top_p,
                 "repetition_penalty": self.repetition_penalty,
                 "max_new_tokens": self.max_tokens,
             }
 
-            return dict(model=model, inputs=inputs, model_params=model_params)
+            return model_params
 
         # return dict by default
         return msgspec.structs.asdict(self)
