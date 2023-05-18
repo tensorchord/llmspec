@@ -72,13 +72,13 @@ class ChatCompletionRequest(CompletionRequest):
             prompt = []
             for message in self.messages:
                 if message.role == Role.USER:
-                    message_prefix = '<|Human|>'
+                    message_prefix = "<|Human|>"
                 elif message.role == Role.ASSISTANT:
-                    message_prefix = '<|MOSS|>'
+                    message_prefix = "<|MOSS|>"
                 else:
-                    message_prefix = ''
+                    message_prefix = ""
                 prompt.append(f"{message_prefix} {message.content}")
-            prompt = "\n".join(prompt) + '\n<|MOSS|>:'
+            prompt = "\n".join(prompt) + "\n<|MOSS|>:"
 
             # MOSS model parameters
             model_params = {
