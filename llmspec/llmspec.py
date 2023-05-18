@@ -36,8 +36,10 @@ class CompletionRequest(msgspec.Struct, kw_only=True):
     stop: Optional[str] = None
     presence_penalty: float = 0.0
     frequency_penalty: float = 0.0
+    repetition_penalty: float = 0.0
     logit_bias: Optional[Dict] = None
     user: str = ""
+    do_sample: bool = False
 
     @classmethod
     def from_bytes(cls, buf: bytes):
@@ -56,15 +58,48 @@ class ChatCompletionRequest(CompletionRequest):
     model: str
     messages: List[ChatMessage]
 
-    def to_model(self, model: str = "ChatGLM"):
+    def get_prompt(self, model: str = "ChatGLM"):
+        if model.lower() == "chatglm":
+            prompt = self.messages[-1].content
+            return prompt
+        elif model.lower() == "moss":
+            prompt = []
+            for message in self.messages:
+                if message.role == Role.USER:
+                    message_prefix = "<|Human|>"
+                elif message.role == Role.ASSISTANT:
+                    message_prefix = "<|MOSS|>"
+                else:
+                    message_prefix = ""
+                prompt.append(f"{message_prefix} {message.content}")
+            prompt = "\n".join(prompt) + "\n<|MOSS|>:"
+        else:
+            raise ValueError(f"Model {model} not supported.")
+
+    def get_inference_args(self, model: str = "ChatGLM"):
         if model.lower() == "chatglm":
             return dict(
-                prompt=self.messages[-1].content,
+                prompt=self.get_prompt(model=model),
                 history=[msg.content for msg in self.messages[:-1]],
                 max_length=self.max_tokens,
                 top_p=self.top_p,
                 temperature=self.temperature,
             )
+        elif model.lower() == "moss":
+            prompt = self.get_prompt(model=model)
+
+            # MOSS model parameters
+            model_params = {
+                "inputs": prompt,
+                "do_sample": self.sample,
+                "temperature": self.temperature,
+                "top_p": self.top_p,
+                "repetition_penalty": self.repetition_penalty,
+                "max_new_tokens": self.max_tokens,
+            }
+
+            return model_params
+
         # return dict by default
         return msgspec.structs.asdict(self)
 
