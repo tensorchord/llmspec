@@ -40,7 +40,6 @@ class CompletionRequest(msgspec.Struct, kw_only=True):
     logit_bias: Optional[Dict] = None
     user: str = ""
     sample: bool = False
-    inputs: Any = None
 
     @classmethod
     def from_bytes(cls, buf: bytes):
