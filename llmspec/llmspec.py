@@ -54,15 +54,42 @@ class PromptCompletionRequest(CompletionRequest):
     best_of: int = 1
 
 
+class LanguageModels(Enum):
+    CHAT_GLM = "ChatGLM"
+    MOSS = "MOSS"
+
+    UNKNOWN = "unknown"
+
+    @classmethod
+    def find(cls, name: str) -> "LanguageModels":
+        if name.lower().startswith("thudm/chatglm"):
+            return cls.CHAT_GLM
+        if name.lower().startswith("fnlp/moss-moon"):
+            return cls.MOSS
+        return cls.UNKNOWN
+
+
 class ChatCompletionRequest(CompletionRequest):
     model: str
     messages: List[ChatMessage]
 
-    def get_prompt(self, model: str = "ChatGLM"):
-        if model.lower() == "chatglm":
-            prompt = self.messages[-1].content
+    def get_prompt(self, model: str):
+        if LanguageModels.find(model) == LanguageModels.CHAT_GLM:
+            # ref to https://huggingface.co/THUDM/chatglm-6b/blob/main/modeling_chatglm.py#L1267
+            if len(self.messages) == 1:
+                return self.messages[0].content
+            round = -1
+            prompt = ""
+            for message in self.messages:
+                if message.role == Role.USER:
+                    round += 1
+                    prompt += f"[Round {round}]\n问：{message.content}\n"
+                elif message.role == Role.ASSISTANT:
+                    prompt += f"答：{message.content}\n"
+                else:
+                    prompt += f"{message.content}\n"
             return prompt
-        elif model.lower() == "moss":
+        elif LanguageModels.find(model) == LanguageModels.MOSS:
             prompt = []
             for message in self.messages:
                 if message.role == Role.USER:
@@ -72,25 +99,19 @@ class ChatCompletionRequest(CompletionRequest):
                 else:
                     message_prefix = ""
                 prompt.append(f"{message_prefix} {message.content}")
-            prompt = "\n".join(prompt) + "\n<|MOSS|>:"
-        else:
-            raise ValueError(f"Model {model} not supported.")
+            return "\n".join(prompt) + "\n<|MOSS|>:"
+        # return all the content by default
+        return "\n".join(message.content for message in self.messages)
 
-    def get_inference_args(self, model: str = "ChatGLM"):
-        if model.lower() == "chatglm":
+    def get_inference_args(self, model: str):
+        if LanguageModels.find(model) == LanguageModels.CHAT_GLM:
             return dict(
-                prompt=self.get_prompt(model=model),
-                history=[msg.content for msg in self.messages[:-1]],
                 max_length=self.max_tokens,
                 top_p=self.top_p,
                 temperature=self.temperature,
             )
-        elif model.lower() == "moss":
-            prompt = self.get_prompt(model=model)
-
-            # MOSS model parameters
+        elif LanguageModels.find(model) == LanguageModels.MOSS:
             model_params = {
-                "inputs": prompt,
                 "do_sample": self.sample,
                 "temperature": self.temperature,
                 "top_p": self.top_p,
