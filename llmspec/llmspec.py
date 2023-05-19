@@ -27,9 +27,9 @@ class ChatMessage(msgspec.Struct):
 
 
 class RoleTokenMap(msgspec.Struct, kw_only=True):
-    user_token: str
-    assistant_token: str
-    system_token: str
+    user_token: str = ""
+    assistant_token: str = ""
+    system_token: str = ""
 
 
 class ChatGLMRoleTokenMap(RoleTokenMap):
@@ -161,7 +161,7 @@ class ChatCompletionRequest(CompletionRequest):
             )
 
         # return all the content by default
-        return "\n".join(message.content for message in self.messages)
+        return get_standard_conversation_prompt(self.messages, RoleTokenMap(), False)
 
     def get_inference_args(self, model: str):
         if LanguageModels.find(model) == LanguageModels.CHAT_GLM:
