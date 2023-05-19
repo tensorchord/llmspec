@@ -1,8 +1,13 @@
 [project]
 name = "llmspec"
-version = "0.1.0"
+dynamic = ["version"]
 description = "LLM unified interface"
 authors = [{ name = "TensorChord", email = "modelz@tensorchord.ai" }]
+keywords = ["machine learning", "deep learning", "large language model"]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
     "msgspec>=0.15.0",
 ]
@@ -15,7 +20,10 @@ requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
 [tool.pdm]
-
+[tool.pdm.version]
+source = "scm"
+write_to = "llmspec/__version__.py"
+write_template = "__version__ = '{}'"
 [tool.pdm.dev-dependencies]
 lint = [
     "ruff>=0.0.267",
@@ -24,7 +32,6 @@ lint = [
 test = [
     "pytest>=7.3.1",
 ]
-
 [tool.pdm.scripts]
 black = "black --check llmspec"
 ruff = "ruff check ."
