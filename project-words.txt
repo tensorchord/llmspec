@@ -9,3 +9,6 @@ pypa
 PYPI
 pypi
 pytest
+stabilityai
+stablelm
+thudm
