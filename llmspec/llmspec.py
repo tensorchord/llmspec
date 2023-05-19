@@ -205,7 +205,7 @@ class CompletionResponse(msgspec.Struct):
     usage: TokenUsage
 
     def to_json(self):
-        msgspec.json.encode(self)
+        return msgspec.json.encode(self)
 
 
 class EmbeddingRequest(msgspec.Struct):
