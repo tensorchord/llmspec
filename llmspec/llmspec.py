@@ -26,6 +26,65 @@ class ChatMessage(msgspec.Struct):
     name: str = ""
 
 
+class RoleTokenMap(msgspec.Struct, kw_only=True):
+    user_token: str = ""
+    assistant_token: str = ""
+    system_token: str = ""
+
+
+class ChatGLMRoleTokenMap(RoleTokenMap):
+    """
+    ChatGLM role token map.
+    Currently not used because standard ChatGLM prompt
+    requires the inclusion of a dynamic round number.
+    """
+
+    user_token: str = "问："
+    assistant_token: str = "答："
+    system_token: str = ""
+
+
+class MOSSRoleTokenMap(RoleTokenMap):
+    """
+    MOSS role token map.
+    """
+
+    user_token: str = "<|USER|>"
+    assistant_token: str = "<|ASSISTANT|>"
+    system_token: str = "<|SYSTEM|>"
+
+
+class StableLMRoleTokenMap(RoleTokenMap):
+    """
+    StableLM role token map.
+    """
+
+    user_token: str = "<|Human|>"
+    assistant_token: str = "<|StableLM|>"
+    system_token: str = ""
+
+
+def get_standard_conversation_prompt(
+    messages: List[ChatMessage],
+    role_token_map: RoleTokenMap,
+    append_assistant_token: bool = True,
+) -> str:
+    """Get a prompt for a conversation using the commonly used format in chat models."""
+    formatted_messages = []
+    for message in messages:
+        if message.role == Role.USER:
+            message_prefix = role_token_map.user_token
+        elif message.role == Role.ASSISTANT:
+            message_prefix = role_token_map.assistant_token
+        else:
+            message_prefix = role_token_map.system_token
+        formatted_messages.append(f"{message_prefix}{message.content}")
+    prompt_suffix = (
+        f"\n{role_token_map.assistant_token}" if append_assistant_token else ""
+    )
+    return "\n".join(formatted_messages) + prompt_suffix
+
+
 class CompletionRequest(msgspec.Struct, kw_only=True):
     suffix: Optional[str] = None
     max_tokens: int = 16
@@ -57,6 +116,7 @@ class PromptCompletionRequest(CompletionRequest):
 class LanguageModels(Enum):
     CHAT_GLM = "ChatGLM"
     MOSS = "MOSS"
+    STABLE_LM = "StableLM"
 
     UNKNOWN = "unknown"
 
@@ -66,6 +126,8 @@ class LanguageModels(Enum):
             return cls.CHAT_GLM
         if name.lower().startswith("fnlp/moss-moon"):
             return cls.MOSS
+        if name.lower().startswith("stabilityai/stablelm"):
+            return cls.STABLE_LM
         return cls.UNKNOWN
 
 
@@ -90,18 +152,16 @@ class ChatCompletionRequest(CompletionRequest):
                     prompt += f"{message.content}\n"
             return prompt
         elif LanguageModels.find(model) == LanguageModels.MOSS:
-            prompt = []
-            for message in self.messages:
-                if message.role == Role.USER:
-                    message_prefix = "<|Human|>"
-                elif message.role == Role.ASSISTANT:
-                    message_prefix = "<|MOSS|>"
-                else:
-                    message_prefix = ""
-                prompt.append(f"{message_prefix} {message.content}")
-            return "\n".join(prompt) + "\n<|MOSS|>:"
+            return get_standard_conversation_prompt(
+                self.messages, MOSSRoleTokenMap(), True
+            )
+        elif LanguageModels.find(model) == LanguageModels.STABLE_LM:
+            return get_standard_conversation_prompt(
+                self.messages, StableLMRoleTokenMap(), True
+            )
+
         # return all the content by default
-        return "\n".join(message.content for message in self.messages)
+        return get_standard_conversation_prompt(self.messages, RoleTokenMap(), False)
 
     def get_inference_args(self, model: str):
         if LanguageModels.find(model) == LanguageModels.CHAT_GLM:
@@ -112,7 +172,7 @@ class ChatCompletionRequest(CompletionRequest):
             )
         elif LanguageModels.find(model) == LanguageModels.MOSS:
             model_params = {
-                "do_sample": self.sample,
+                "do_sample": self.do_sample,
                 "temperature": self.temperature,
                 "top_p": self.top_p,
                 "repetition_penalty": self.repetition_penalty,
