@@ -204,6 +204,9 @@ class CompletionResponse(msgspec.Struct):
     choices: List[ChatChoice]
     usage: TokenUsage
 
+    def to_json(self):
+        msgspec.json.encode(self)
+
 
 class EmbeddingRequest(msgspec.Struct):
     model: str
