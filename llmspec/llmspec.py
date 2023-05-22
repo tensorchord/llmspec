@@ -74,9 +74,13 @@ StableLM = LanguageModelInfo(
     system_token="",
     transformer_model_cls="AutoModelForCausalLM",
 )
+BloomZ = LanguageModelInfo(
+    transformer_model_cls="AutoModelForCausalLM",
+)
 LLaMA = LanguageModelInfo(
     transformer_model_cls="AutoModelForCausalLM",
 )
+Unknown = LanguageModelInfo()
 
 
 class CompletionRequest(msgspec.Struct, kw_only=True):
@@ -111,8 +115,9 @@ class LanguageModels(Enum):
     CHAT_GLM = ChatGLM
     MOSS = MOSS
     STABLE_LM = StableLM
+    BLOOM_Z = BloomZ
 
-    UNKNOWN = LanguageModelInfo()
+    UNKNOWN = Unknown
 
     @classmethod
     def find(cls, name: str) -> LanguageModelInfo:
@@ -122,6 +127,8 @@ class LanguageModels(Enum):
             return cls.MOSS
         if name.lower().startswith("stabilityai/stablelm"):
             return cls.STABLE_LM
+        if name.lower().startswith("bigscience/bloomz"):
+            return cls.BLOOM_Z
         return cls.UNKNOWN
 
 
