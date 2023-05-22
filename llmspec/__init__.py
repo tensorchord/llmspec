@@ -1,4 +1,5 @@
 from llmspec.llmspec import (
+    LanguageModels,
     LLMSpec,
     ChatChoice,
     ChatMessage,
@@ -12,6 +13,7 @@ from llmspec.llmspec import (
 )
 
 __all__ = [
+    "LanguageModels",
     "LLMSpec",
     "ChatMessage",
     "ChatCompletionRequest",
