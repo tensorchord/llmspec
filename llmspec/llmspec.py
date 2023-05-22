@@ -34,7 +34,7 @@ class LanguageModelInfo(msgspec.Struct):
     assistant_token: str = ""
     system_token: str = ""
 
-    # transformer model class
+    # model class name in `transformers`
     transformer_model_cls: str = "AutoModelForCausalLM"
 
     def get_conversation_prompt(
@@ -120,7 +120,7 @@ class LanguageModels(Enum):
     UNKNOWN = Unknown
 
     @classmethod
-    def find(cls, name: str) -> LanguageModelInfo:
+    def find(cls, name: str) -> "LanguageModels":
         if name.lower().startswith("thudm/chatglm"):
             return cls.CHAT_GLM
         if name.lower().startswith("fnlp/moss-moon"):
@@ -154,8 +154,8 @@ class ChatCompletionRequest(CompletionRequest):
                     prompt += f"{message.content}\n"
             return prompt
         elif model in (LanguageModels.MOSS, LanguageModels.STABLE_LM):
-            return model.get_conversation_prompt(self.messages)
-        return model.get_con(self.messages, False)
+            return model.value.get_conversation_prompt(self.messages)
+        return model.value.get_conversation_prompt(self.messages, False)
 
     def get_inference_args(self, model: str):
         if LanguageModels.find(model) == LanguageModels.CHAT_GLM:
