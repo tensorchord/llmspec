@@ -26,63 +26,57 @@ class ChatMessage(msgspec.Struct):
     name: str = ""
 
 
-class RoleTokenMap(msgspec.Struct, kw_only=True):
+class LanguageModelInfo(msgspec.Struct):
+    """Language model information."""
+
+    # token
     user_token: str = ""
     assistant_token: str = ""
     system_token: str = ""
 
+    # transformer model class
+    transformer_model_cls: str = "AutoModelForCausalLM"
 
-class ChatGLMRoleTokenMap(RoleTokenMap):
-    """
-    ChatGLM role token map.
-    Currently not used because standard ChatGLM prompt
-    requires the inclusion of a dynamic round number.
-    """
-
-    user_token: str = "问："
-    assistant_token: str = "答："
-    system_token: str = ""
-
-
-class MOSSRoleTokenMap(RoleTokenMap):
-    """
-    MOSS role token map.
-    """
-
-    user_token: str = "<|USER|>"
-    assistant_token: str = "<|ASSISTANT|>"
-    system_token: str = "<|SYSTEM|>"
-
-
-class StableLMRoleTokenMap(RoleTokenMap):
-    """
-    StableLM role token map.
-    """
-
-    user_token: str = "<|Human|>"
-    assistant_token: str = "<|StableLM|>"
-    system_token: str = ""
+    def get_conversation_prompt(
+        self, messages: List[ChatMessage], append_assistant_token: bool = True
+    ) -> str:
+        """Get the prompt for a conversation using the specific tokens of the model."""
+        formatted_messages = []
+        for message in messages:
+            if message.role == Role.USER:
+                message_prefix = self.user_token
+            elif message.role == Role.ASSISTANT:
+                message_prefix = self.assistant_token
+            else:
+                message_prefix = self.system_token
+            formatted_messages.append(f"{message_prefix}{message.content}")
+        conversation = "\n".join(formatted_messages)
+        if append_assistant_token:
+            conversation += f"\n{self.assistant_token}"
+        return conversation
 
 
-def get_standard_conversation_prompt(
-    messages: List[ChatMessage],
-    role_token_map: RoleTokenMap,
-    append_assistant_token: bool = True,
-) -> str:
-    """Get a prompt for a conversation using the commonly used format in chat models."""
-    formatted_messages = []
-    for message in messages:
-        if message.role == Role.USER:
-            message_prefix = role_token_map.user_token
-        elif message.role == Role.ASSISTANT:
-            message_prefix = role_token_map.assistant_token
-        else:
-            message_prefix = role_token_map.system_token
-        formatted_messages.append(f"{message_prefix}{message.content}")
-    prompt_suffix = (
-        f"\n{role_token_map.assistant_token}" if append_assistant_token else ""
-    )
-    return "\n".join(formatted_messages) + prompt_suffix
+ChatGLM = LanguageModelInfo(
+    user_token="问：",
+    assistant_token="答：",
+    system_token="",
+    transformer_model_cls="AutoModel",
+)
+MOSS = LanguageModelInfo(
+    user_token="<|USER|>",
+    assistant_token="<|ASSISTANT|>",
+    system_token="<|SYSTEM|>",
+    transformer_model_cls="AutoModelForCausalLM",
+)
+StableLM = LanguageModelInfo(
+    user_token="<|Human|>",
+    assistant_token="<|StableLM|>",
+    system_token="",
+    transformer_model_cls="AutoModelForCausalLM",
+)
+LLaMA = LanguageModelInfo(
+    transformer_model_cls="AutoModelForCausalLM",
+)
 
 
 class CompletionRequest(msgspec.Struct, kw_only=True):
@@ -114,14 +108,14 @@ class PromptCompletionRequest(CompletionRequest):
 
 
 class LanguageModels(Enum):
-    CHAT_GLM = "ChatGLM"
-    MOSS = "MOSS"
-    STABLE_LM = "StableLM"
+    CHAT_GLM = ChatGLM
+    MOSS = MOSS
+    STABLE_LM = StableLM
 
-    UNKNOWN = "unknown"
+    UNKNOWN = LanguageModelInfo()
 
     @classmethod
-    def find(cls, name: str) -> "LanguageModels":
+    def find(cls, name: str) -> LanguageModelInfo:
         if name.lower().startswith("thudm/chatglm"):
             return cls.CHAT_GLM
         if name.lower().startswith("fnlp/moss-moon"):
@@ -136,7 +130,8 @@ class ChatCompletionRequest(CompletionRequest):
     messages: List[ChatMessage]
 
     def get_prompt(self, model: str):
-        if LanguageModels.find(model) == LanguageModels.CHAT_GLM:
+        model = LanguageModels.find(model)
+        if model is LanguageModels.CHAT_GLM:
             # ref to https://huggingface.co/THUDM/chatglm-6b/blob/main/modeling_chatglm.py#L1267
             if len(self.messages) == 1:
                 return self.messages[0].content
@@ -151,17 +146,9 @@ class ChatCompletionRequest(CompletionRequest):
                 else:
                     prompt += f"{message.content}\n"
             return prompt
-        elif LanguageModels.find(model) == LanguageModels.MOSS:
-            return get_standard_conversation_prompt(
-                self.messages, MOSSRoleTokenMap(), True
-            )
-        elif LanguageModels.find(model) == LanguageModels.STABLE_LM:
-            return get_standard_conversation_prompt(
-                self.messages, StableLMRoleTokenMap(), True
-            )
-
-        # return all the content by default
-        return get_standard_conversation_prompt(self.messages, RoleTokenMap(), False)
+        elif model in (LanguageModels.MOSS, LanguageModels.STABLE_LM):
+            return model.get_conversation_prompt(self.messages)
+        return model.get_con(self.messages, False)
 
     def get_inference_args(self, model: str):
         if LanguageModels.find(model) == LanguageModels.CHAT_GLM:
