@@ -5,11 +5,13 @@ from llmspec.llmspec import (
     ChatMessage,
     ChatCompletionRequest,
     CompletionResponse,
+    CompletionChoice,
     PromptCompletionRequest,
     EmbeddingRequest,
     EmbeddingResponse,
-    TokenUsage,
+    ErrorResponse,
     Role,
+    TokenUsage,
 )
 
 __all__ = [
@@ -19,9 +21,12 @@ __all__ = [
     "ChatCompletionRequest",
     "ChatChoice",
     "CompletionResponse",
+    "CompletionChoice",
     "PromptCompletionRequest",
     "EmbeddingRequest",
     "EmbeddingResponse",
-    "TokenUsage",
+    "ErrorResponse",
+    "ErrorMessage",
     "Role",
+    "TokenUsage",
 ]

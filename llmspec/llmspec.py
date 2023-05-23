@@ -102,10 +102,15 @@ class CompletionRequest(msgspec.Struct, kw_only=True):
 
 class PromptCompletionRequest(CompletionRequest):
     model: str
-    prompt: str = "<|endoftext|>"
+    prompt: Union[str, List[str]] = "<|endoftext|>"
     echo: bool = False
     logprobs: Optional[int] = None
     best_of: int = 1
+
+    def get_prompt(self):
+        if isinstance(self.prompt, list):
+            return "\n".join(self.prompt)
+        return self.prompt
 
 
 class LanguageModels(Enum):
@@ -190,15 +195,30 @@ class TokenUsage(msgspec.Struct):
     total_tokens: int
 
 
-class CompletionResponse(msgspec.Struct):
+class CompletionChoice(msgspec.Struct):
+    text: str
+    index: int = 0
+    logprobs: Optional[int] = None
+    finish_reason: str = "length"
+
+
+class LMResponse(msgspec.Struct):
     id: str
     object: str
     created: datetime
-    choices: List[ChatChoice]
+    model: str
     usage: TokenUsage
 
     def to_json(self):
         return msgspec.json.encode(self)
+
+
+class CompletionResponse(LMResponse):
+    choices: List[CompletionChoice]
+
+
+class ChatResponse(LMResponse):
+    choices: List[ChatChoice]
 
 
 class EmbeddingRequest(msgspec.Struct):
@@ -218,6 +238,33 @@ class EmbeddingResponse(msgspec.Struct):
     model: str
     usage: TokenUsage
     object: str = "list"
+
+
+class ErrorMessage(msgspec.Struct):
+    code: int
+    type: str
+    message: str
+    param: str
+
+
+class ErrorResponse(msgspec.Struct):
+    error: ErrorMessage
+
+    @classmethod
+    def from_validation_err(
+        cls, err: msgspec.ValidationError, param: str = ""
+    ) -> ErrorResponse:
+        return ErrorResponse(
+            error=ErrorMessage(
+                code=400,
+                type="validation_error",
+                message=str(err),
+                param=param,
+            )
+        )
+
+    def to_json(self):
+        return msgspec.json.encode(self)
 
 
 class LLMSpec:
