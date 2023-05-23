@@ -138,8 +138,8 @@ class ChatCompletionRequest(CompletionRequest):
     messages: List[ChatMessage]
 
     def get_prompt(self, model: str):
-        model = LanguageModels.find(model)
-        if model is LanguageModels.CHAT_GLM:
+        language_model = LanguageModels.find(model)
+        if language_model is LanguageModels.CHAT_GLM:
             # ref to https://huggingface.co/THUDM/chatglm-6b/blob/main/modeling_chatglm.py#L1267
             if len(self.messages) == 1:
                 return self.messages[0].content
@@ -154,7 +154,7 @@ class ChatCompletionRequest(CompletionRequest):
                 else:
                     prompt += f"{message.content}\n"
             return prompt
-        return model.value.get_conversation_prompt(self.messages)
+        return language_model.value.get_conversation_prompt(self.messages)
 
     def get_inference_args(self, model: str):
         if LanguageModels.find(model) == LanguageModels.CHAT_GLM:
