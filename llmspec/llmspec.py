@@ -251,13 +251,17 @@ class ErrorResponse(msgspec.Struct):
     error: ErrorMessage
 
     @classmethod
-    def from_validation_err(cls, err: msgspec.ValidationError, param: str = "") -> ErrorResponse:
-        return ErrorResponse(error=ErrorMessage(
-            code=400,
-            type="validation_error",
-            message=str(err),
-            param=param,
-        ))
+    def from_validation_err(
+        cls, err: msgspec.ValidationError, param: str = ""
+    ) -> ErrorResponse:
+        return ErrorResponse(
+            error=ErrorMessage(
+                code=400,
+                type="validation_error",
+                message=str(err),
+                param=param,
+            )
+        )
 
     def to_json(self):
         return msgspec.json.encode(self)

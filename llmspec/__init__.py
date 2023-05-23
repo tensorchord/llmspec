@@ -11,6 +11,7 @@ from llmspec.llmspec import (
     EmbeddingResponse,
     ErrorResponse,
     Role,
+    TokenUsage,
 )
 
 __all__ = [
@@ -27,4 +28,5 @@ __all__ = [
     "ErrorResponse",
     "ErrorMessage" "TokenUsage",
     "Role",
+    "TokenUsage",
 ]
