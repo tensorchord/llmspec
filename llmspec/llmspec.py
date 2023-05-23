@@ -102,10 +102,15 @@ class CompletionRequest(msgspec.Struct, kw_only=True):
 
 class PromptCompletionRequest(CompletionRequest):
     model: str
-    prompt: str = "<|endoftext|>"
+    prompt: Union[str, List[str]] = "<|endoftext|>"
     echo: bool = False
     logprobs: Optional[int] = None
     best_of: int = 1
+
+    def get_prompt(self):
+        if isinstance(self.prompt, list):
+            return "\n".join(self.prompt)
+        return self.prompt
 
 
 class LanguageModels(Enum):
@@ -218,6 +223,17 @@ class EmbeddingResponse(msgspec.Struct):
     model: str
     usage: TokenUsage
     object: str = "list"
+
+
+class ErrorMessage(msgspec.Struct):
+    code: int
+    type: str
+    message: str
+    param: str
+
+
+class ErrorResponse(msgspec.Struct):
+    error: ErrorMessage
 
 
 class LLMSpec:
