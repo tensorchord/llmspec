@@ -26,7 +26,7 @@ __all__ = [
     "EmbeddingRequest",
     "EmbeddingResponse",
     "ErrorResponse",
-    "ErrorMessage" "TokenUsage",
+    "ErrorMessage",
     "Role",
     "TokenUsage",
 ]
