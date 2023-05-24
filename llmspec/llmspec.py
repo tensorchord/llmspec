@@ -1,8 +1,9 @@
 from __future__ import annotations
+
 import json
-from typing import Union, Optional, Dict, List
 from datetime import datetime
 from enum import Enum
+from typing import Dict, List, Optional, Union
 
 import msgspec
 
