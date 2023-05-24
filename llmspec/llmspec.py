@@ -229,7 +229,7 @@ class EmbeddingRequest(msgspec.Struct):
 
 
 class EmbeddingData(msgspec.Struct):
-    embedding: List[float]
+    embedding: Union[EmbeddingValue, List[EmbeddingValue]]
     index: int
     object: str = "embedding"
 
