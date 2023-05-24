@@ -39,7 +39,7 @@ lint = { composite = ["black", "ruff"] }
 
 [tool.ruff]
 line-length = 88
-select = ["E", "F", "B"]
+select = ["E", "F", "B", "I", "SIM", "TID", "PL"]
 
 [tool.black]
 line-length = 88
