@@ -81,7 +81,7 @@ LLaMA = LanguageModelInfo()
 Unknown = LanguageModelInfo()
 
 
-class CompletionRequest(msgspec.Struct, kw_only=True):
+class CompletionRequest(msgspec.Struct, JSONSerializableMixin, kw_only=True):
     suffix: Optional[str] = None
     max_tokens: int = 16
     temperature: float = 1.0
@@ -95,10 +95,6 @@ class CompletionRequest(msgspec.Struct, kw_only=True):
     logit_bias: Optional[Dict] = None
     user: str = ""
     do_sample: bool = False
-
-    @classmethod
-    def from_bytes(cls, buf: bytes):
-        return msgspec.json.decode(buf, type=cls)
 
 
 class PromptCompletionRequest(CompletionRequest):
@@ -203,15 +199,12 @@ class CompletionChoice(msgspec.Struct):
     finish_reason: str = "length"
 
 
-class LMResponse(msgspec.Struct):
+class LMResponse(msgspec.Struct, JSONSerializableMixin):
     id: str
     object: str
     created: datetime
     model: str
     usage: TokenUsage
-
-    def to_json(self):
-        return msgspec.json.encode(self)
 
 
 class CompletionResponse(LMResponse):
@@ -222,19 +215,24 @@ class ChatResponse(LMResponse):
     choices: List[ChatChoice]
 
 
-class EmbeddingRequest(msgspec.Struct):
+class EmbeddingRequest(msgspec.Struct, JSONSerializableMixin):
     model: str
     input: Union[str, List[str]]
     user: str = ""
 
 
 class EmbeddingData(msgspec.Struct):
-    embedding: Union[EmbeddingValue, List[EmbeddingValue]]
+    # not using EmbeddingValue
+    # TypeError: Type unions may not contain more than
+    # one array-like (list, set, tuple) type - type
+    # `typing.Union[typing.List[float], typing.List[typing.List[float]]]`
+    # is not supported
+    embedding: List[Union[float, List[float]]]
     index: int
     object: str = "embedding"
 
 
-class EmbeddingResponse(msgspec.Struct):
+class EmbeddingResponse(msgspec.Struct, JSONSerializableMixin):
     data: EmbeddingData
     model: str
     usage: TokenUsage
@@ -248,7 +246,7 @@ class ErrorMessage(msgspec.Struct):
     param: str
 
 
-class ErrorResponse(msgspec.Struct):
+class ErrorResponse(msgspec.Struct, JSONSerializableMixin):
     error: ErrorMessage
 
     @classmethod
@@ -263,9 +261,6 @@ class ErrorResponse(msgspec.Struct):
                 param=param,
             )
         )
-
-    def to_json(self):
-        return msgspec.json.encode(self)
 
 
 class LLMSpec:
