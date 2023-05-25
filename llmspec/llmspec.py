@@ -84,7 +84,13 @@ StableLM = LanguageModelInfo(
     sep_token="\n",
     append_assistant_token=True,
 )
-LLaMA = LanguageModelInfo()
+LLaMA = LanguageModelInfo(
+    user_token="USER: ",
+    assistant_token="ASSISTANT: ",
+    system_token="",
+    sep_token="\n",
+    append_assistant_token=True,
+)
 Vicuna = LanguageModelInfo(
     user_token="USER: ",
     assistant_token="ASSISTANT: ",
