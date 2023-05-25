@@ -66,6 +66,7 @@ ChatGLM = LanguageModelInfo(
     user_token="问：",
     assistant_token="答：",
     system_token="",
+    sep_token="\n",
     transformer_model_cls="AutoModel",
 )
 MOSS = LanguageModelInfo(
