@@ -37,6 +37,7 @@ class LanguageModelInfo(msgspec.Struct):
     user_token: str = ""
     assistant_token: str = ""
     system_token: str = ""
+    sep_token: str = ""
     append_assistant_token: bool = False
 
     # model class name in `transformers`
@@ -52,7 +53,9 @@ class LanguageModelInfo(msgspec.Struct):
                 message_prefix = self.assistant_token
             else:
                 message_prefix = self.system_token
-            formatted_messages.append(f"{message_prefix}{message.content}")
+            formatted_messages.append(
+                f"{message_prefix}{message.content}{self.sep_token}"
+            )
         conversation = "\n".join(formatted_messages)
         if self.append_assistant_token:
             conversation += f"\n{self.assistant_token}"
@@ -62,6 +65,7 @@ class LanguageModelInfo(msgspec.Struct):
 ChatGLM = LanguageModelInfo(
     user_token="问：",
     assistant_token="答：",
+    sep_token="\n",
     system_token="",
     transformer_model_cls="AutoModel",
 )
@@ -69,6 +73,7 @@ MOSS = LanguageModelInfo(
     user_token="<|USER|>",
     assistant_token="<|ASSISTANT|>",
     system_token="<|SYSTEM|>",
+    sep_token="\n",
     transformer_model_cls="AutoModelForCausalLM",
     append_assistant_token=True,
 )
@@ -76,10 +81,25 @@ StableLM = LanguageModelInfo(
     user_token="<|Human|>",
     assistant_token="<|StableLM|>",
     system_token="",
+    sep_token="\n",
     append_assistant_token=True,
 )
-BloomZ = LanguageModelInfo()
 LLaMA = LanguageModelInfo()
+Vicuna = LanguageModelInfo(
+    user_token="USER: ",
+    assistant_token="ASSISTANT: ",
+    system_token="",
+    sep_token="\n### ",
+    append_assistant_token=True,
+)
+BloomZ = LanguageModelInfo(
+    user_token="USER: ",
+    assistant_token="ASSISTANT: ",
+    system_token="",
+    sep_token="\n",
+    append_assistant_token=True,
+)
+FastChatT5 = Vicuna
 Unknown = LanguageModelInfo()
 
 
@@ -117,11 +137,14 @@ class LanguageModels(Enum):
     MOSS = MOSS
     STABLE_LM = StableLM
     BLOOM_Z = BloomZ
+    LLAMA = LLaMA
+    VICUNA = Vicuna
+    FASTCHATT5 = FastChatT5
 
     UNKNOWN = Unknown
 
     @classmethod
-    def find(cls, name: str) -> LanguageModels:
+    def find(cls, name: str) -> LanguageModels:  # noqa: PLR0911
         if name.lower().startswith("thudm/chatglm"):
             return cls.CHAT_GLM
         if name.lower().startswith("fnlp/moss-moon"):
@@ -130,6 +153,12 @@ class LanguageModels(Enum):
             return cls.STABLE_LM
         if name.lower().startswith("bigscience/bloomz"):
             return cls.BLOOM_Z
+        if name.lower().startswith("decapoda-research/llama"):
+            return cls.LLaMA
+        if name.lower().startswith("lmsys/vicuna"):
+            return cls.VICUNA
+        if name.lower().startswith("lmsys/fastchat"):
+            return cls.FASTCHATT5
         return cls.UNKNOWN
 
     @classmethod
