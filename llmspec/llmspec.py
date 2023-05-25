@@ -7,6 +7,8 @@ from typing import Dict, List, Optional, Union
 
 import msgspec
 
+from llmspec.mixins import JSONSerializableMixin
+
 
 class Role(Enum):
     """Chat roles."""
