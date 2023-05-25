@@ -193,7 +193,6 @@ class ChatCompletionRequest(CompletionRequest):
                 else:
                     prompt += f"{message.content}\n"
             return prompt
-        print(language_model.value.get_conversation_prompt(self.messages))
         return language_model.value.get_conversation_prompt(self.messages)
 
     def get_inference_args(self, model: str):
