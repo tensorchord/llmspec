@@ -38,7 +38,6 @@ class LanguageModelInfo(msgspec.Struct):
     assistant_token: str = ""
     system_token: str = ""
     sep_token: str = ""
-    end_token: str = ""
     append_assistant_token: bool = False
 
     # model class name in `transformers`
@@ -59,7 +58,7 @@ class LanguageModelInfo(msgspec.Struct):
             )
         conversation = "\n".join(formatted_messages)
         if self.append_assistant_token:
-            conversation += f"\n{self.assistant_token}{self.end_token}"
+            conversation += f"\n{self.assistant_token}"
         return conversation
 
 
@@ -91,9 +90,15 @@ Vicuna = LanguageModelInfo(
     assistant_token="ASSISTANT: ",
     system_token="",
     sep_token="\n### ",
-    end_token="###",
+    append_assistant_token=True,
 )
-BloomZ = Vicuna
+BloomZ = LanguageModelInfo(
+    user_token="USER: ",
+    assistant_token="ASSISTANT: ",
+    system_token="",
+    sep_token="\n",
+    append_assistant_token=True,
+)
 FastChatT5 = Vicuna
 Unknown = LanguageModelInfo()
 
