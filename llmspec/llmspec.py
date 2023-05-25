@@ -54,7 +54,9 @@ class LanguageModelInfo(msgspec.Struct):
                 message_prefix = self.assistant_token
             else:
                 message_prefix = self.system_token
-            formatted_messages.append(f"{message_prefix}{message.content}{self.sep_token}")
+            formatted_messages.append(
+                f"{message_prefix}{message.content}{self.sep_token}"
+            )
         conversation = "\n".join(formatted_messages)
         if self.append_assistant_token:
             conversation += f"\n{self.assistant_token}{self.end_token}"
@@ -137,7 +139,7 @@ class LanguageModels(Enum):
     UNKNOWN = Unknown
 
     @classmethod
-    def find(cls, name: str) -> LanguageModels:
+    def find(cls, name: str) -> LanguageModels:  # noqa: PLR0911
         if name.lower().startswith("thudm/chatglm"):
             return cls.CHAT_GLM
         if name.lower().startswith("fnlp/moss-moon"):
