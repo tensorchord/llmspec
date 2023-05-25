@@ -85,7 +85,6 @@ StableLM = LanguageModelInfo(
     sep_token="\n",
     append_assistant_token=True,
 )
-BloomZ = LanguageModelInfo()
 LLaMA = LanguageModelInfo()
 Vicuna = LanguageModelInfo(
     user_token="USER: ",
@@ -94,6 +93,7 @@ Vicuna = LanguageModelInfo(
     sep_token="\n### ",
     end_token="###",
 )
+BloomZ = Vicuna
 FastChatT5 = Vicuna
 Unknown = LanguageModelInfo()
 
