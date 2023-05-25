@@ -56,16 +56,15 @@ class LanguageModelInfo(msgspec.Struct):
             formatted_messages.append(
                 f"{message_prefix}{message.content}{self.sep_token}"
             )
-        conversation = "\n".join(formatted_messages)
+        conversation = "".join(formatted_messages)
         if self.append_assistant_token:
-            conversation += f"\n{self.assistant_token}"
+            conversation += f"{self.assistant_token}"
         return conversation
 
 
 ChatGLM = LanguageModelInfo(
     user_token="问：",
     assistant_token="答：",
-    sep_token="\n",
     system_token="",
     transformer_model_cls="AutoModel",
 )
@@ -187,6 +186,7 @@ class ChatCompletionRequest(CompletionRequest):
                 else:
                     prompt += f"{message.content}\n"
             return prompt
+        print(language_model.value.get_conversation_prompt(self.messages))
         return language_model.value.get_conversation_prompt(self.messages)
 
     def get_inference_args(self, model: str):
