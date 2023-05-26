@@ -108,6 +108,7 @@ BloomZ = LanguageModelInfo(
     system_token="",
     sep_token="\n",
     append_assistant_token=True,
+    is_encoder_decoder=False,
 )
 FastChatT5 = Vicuna
 Unknown = LanguageModelInfo()
