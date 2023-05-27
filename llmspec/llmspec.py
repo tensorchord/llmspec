@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import uuid
 from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Optional, Union
@@ -42,6 +43,9 @@ class LanguageModelInfo(msgspec.Struct):
 
     # model class name in `transformers`
     transformer_model_cls: str = "AutoModelForCausalLM"
+
+    # model structure
+    is_encoder_decoder: bool = True
 
     def get_conversation_prompt(self, messages: List[ChatMessage]) -> str:
         """Get the prompt for a conversation using the specific tokens of the model."""
@@ -104,6 +108,7 @@ BloomZ = LanguageModelInfo(
     system_token="",
     sep_token="\n",
     append_assistant_token=True,
+    is_encoder_decoder=False,
 )
 FastChatT5 = Vicuna
 Unknown = LanguageModelInfo()
@@ -114,9 +119,10 @@ class CompletionRequest(msgspec.Struct, JSONSerializableMixin, kw_only=True):
     max_tokens: int = 16
     temperature: float = 1.0
     top_p: float = 1.0
+    top_k: int = 1
     n: int = 1
     stream: bool = False
-    stop: Optional[Union[str, List[str]]] = None
+    stop: Optional[Union[str, List[int]]] = None
     presence_penalty: float = 0.0
     frequency_penalty: float = 0.0
     repetition_penalty: float = 0.0
@@ -220,7 +226,7 @@ class ChatCompletionRequest(CompletionRequest):
 class ChatChoice(msgspec.Struct):
     message: ChatMessage
     index: int = 0
-    finish_reason: str = "stop"
+    finish_reason: Optional[str] = None
 
 
 class TokenUsage(msgspec.Struct):
@@ -233,7 +239,7 @@ class CompletionChoice(msgspec.Struct):
     text: str
     index: int = 0
     logprobs: Optional[int] = None
-    finish_reason: str = "length"
+    finish_reason: Optional[str] = None
 
 
 class LMResponse(msgspec.Struct, JSONSerializableMixin):
@@ -247,9 +253,67 @@ class LMResponse(msgspec.Struct, JSONSerializableMixin):
 class CompletionResponse(LMResponse):
     choices: List[CompletionChoice]
 
+    @classmethod
+    def from_message(
+        cls,
+        message: str,
+        model: str,
+        finish_reason: str,
+        prompt_token: int,
+        completion_token: int,
+    ):
+        return cls(
+            id=str(uuid.uuid4()),
+            object="completion",
+            created=datetime.now(),
+            model=model,
+            choices=[
+                CompletionChoice(
+                    text=message,
+                    finish_reason=finish_reason,
+                )
+            ],
+            usage=TokenUsage(
+                prompt_tokens=prompt_token,
+                completion_tokens=completion_token,
+                total_tokens=prompt_token + completion_token,
+            ),
+        )
+
 
 class ChatResponse(LMResponse):
     choices: List[ChatChoice]
+
+    @classmethod
+    def from_message(
+        cls,
+        message: str,
+        role: Role,
+        model: str,
+        finish_reason: str,
+        prompt_token: int,
+        completion_token: int,
+    ):
+        return cls(
+            id=str(uuid.uuid4()),
+            object="chat",
+            created=datetime.now(),
+            model=model,
+            choices=[
+                ChatChoice(
+                    message=ChatMessage(
+                        content=message,
+                        role=role,
+                    ),
+                    finish_reason=finish_reason,
+                ),
+            ],
+            usage=TokenUsage(
+                prompt_tokens=prompt_token,
+                completion_tokens=completion_token,
+                total_tokens=prompt_token + completion_token,
+            ),
+        )
 
 
 class EmbeddingRequest(msgspec.Struct, JSONSerializableMixin):

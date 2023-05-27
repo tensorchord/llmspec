@@ -40,6 +40,8 @@ lint = { composite = ["black", "ruff"] }
 [tool.ruff]
 line-length = 88
 select = ["E", "F", "B", "I", "SIM", "TID", "PL"]
+[tool.ruff.pylint]
+max-args = 7
 
 [tool.black]
 line-length = 88
