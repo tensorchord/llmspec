@@ -323,17 +323,13 @@ class EmbeddingRequest(msgspec.Struct, JSONSerializableMixin):
 
 
 class EmbeddingData(msgspec.Struct):
-    # TODO: embedding should be:
-    # - a list of float
-    # - a list of list of float
-    # - a base64 encoded string which is a numpy array bytes
-    embedding: List
+    embedding: Union[List[float], str]
     index: int
     object: str = "embedding"
 
 
 class EmbeddingResponse(msgspec.Struct, JSONSerializableMixin):
-    data: EmbeddingData
+    data: List[EmbeddingData]
     model: str
     usage: TokenUsage
     object: str = "list"
