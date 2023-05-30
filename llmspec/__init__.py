@@ -10,7 +10,6 @@ from llmspec.llmspec import (
     EmbeddingResponse,
     ErrorResponse,
     LanguageModels,
-    LLMSpec,
     PromptCompletionRequest,
     Role,
     TokenUsage,
@@ -18,7 +17,6 @@ from llmspec.llmspec import (
 
 __all__ = [
     "LanguageModels",
-    "LLMSpec",
     "ChatMessage",
     "ChatResponse",
     "ChatCompletionRequest",
