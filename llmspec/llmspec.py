@@ -42,6 +42,7 @@ class LanguageModelInfo(msgspec.Struct):
 
     # model class name in `transformers`
     transformer_model_cls: str = "AutoModelForCausalLM"
+    tokenizer_cls: str = "AutoTokenizer"
 
     # model structure
     is_encoder_decoder: bool = True
@@ -109,7 +110,15 @@ BloomZ = LanguageModelInfo(
     append_assistant_token=True,
     is_encoder_decoder=False,
 )
-FastChatT5 = Vicuna
+FastChatT5 = LanguageModelInfo(
+    user_token="USER: ",
+    assistant_token="ASSISTANT: ",
+    system_token="",
+    sep_token="\n### ",
+    append_assistant_token=True,
+    transformer_model_cls="AutoModelForSeq2SeqLM",
+    tokenizer_cls="T5Tokenizer",
+)
 Unknown = LanguageModelInfo()
 
 
