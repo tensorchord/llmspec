@@ -325,11 +325,10 @@ class ChatResponse(LMResponse):
 
 
 class EmbeddingRequest(msgspec.Struct, JSONSerializableMixin):
-    model: str
-    input: Union[str, List[str]]
+    model: str = ""
+    input: Union[str, List[str]] = None
     user: str = ""
     encoding_format: str = "json"
-
 
 class EmbeddingData(msgspec.Struct):
     embedding: Union[List[float], str]
