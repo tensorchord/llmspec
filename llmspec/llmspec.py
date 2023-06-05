@@ -46,9 +46,6 @@ class LanguageModelInfo(msgspec.Struct):
 
     low_cpu_mem_usage: bool = True
 
-    # model structure
-    is_encoder_decoder: bool = True
-
     def get_conversation_prompt(self, messages: List[ChatMessage]) -> str:
         """Get the prompt for a conversation using the specific tokens of the model."""
         formatted_messages = []
@@ -75,7 +72,6 @@ ChatGLM = LanguageModelInfo(
     sep_token="\n",
     transformer_model_cls="AutoModel",
     low_cpu_mem_usage=False,
-    is_encoder_decoder=False,
 )
 MOSS = LanguageModelInfo(
     user_token="<|USER|>",
@@ -112,7 +108,6 @@ BloomZ = LanguageModelInfo(
     system_token="",
     sep_token="\n",
     append_assistant_token=True,
-    is_encoder_decoder=False,
 )
 FastChatT5 = LanguageModelInfo(
     user_token="USER: ",
