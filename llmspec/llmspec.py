@@ -334,6 +334,7 @@ class EmbeddingRequest(msgspec.Struct, JSONSerializableMixin):
     user: str = ""
     encoding_format: str = "json"
 
+
 class EmbeddingData(msgspec.Struct):
     embedding: Union[List[float], str]
     index: int
