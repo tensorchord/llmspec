@@ -44,6 +44,8 @@ class LanguageModelInfo(msgspec.Struct):
     transformer_model_cls: str = "AutoModelForCausalLM"
     tokenizer_cls: str = "AutoTokenizer"
 
+    low_cpu_mem_usage: bool = True
+
     # model structure
     is_encoder_decoder: bool = True
 
@@ -72,6 +74,8 @@ ChatGLM = LanguageModelInfo(
     system_token="",
     sep_token="\n",
     transformer_model_cls="AutoModel",
+    low_cpu_mem_usage=False,
+    is_encoder_decoder=False,
 )
 MOSS = LanguageModelInfo(
     user_token="<|USER|>",
@@ -329,6 +333,7 @@ class EmbeddingRequest(msgspec.Struct, JSONSerializableMixin):
     input: Union[str, List[str]] = None
     user: str = ""
     encoding_format: str = "json"
+
 
 class EmbeddingData(msgspec.Struct):
     embedding: Union[List[float], str]
