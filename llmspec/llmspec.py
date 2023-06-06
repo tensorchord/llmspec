@@ -173,7 +173,7 @@ class LanguageModels(Enum):
         if name.lower().startswith("bigscience/bloomz"):
             return cls.BLOOM_Z
         if name.lower().startswith("decapoda-research/llama"):
-            return cls.LLaMA
+            return cls.LLAMA
         if name.lower().startswith("lmsys/vicuna"):
             return cls.VICUNA
         if name.lower().startswith("lmsys/fastchat"):
