@@ -1,6 +1,6 @@
 import pytest
 
-from llmspec.llmspec import ChatMessage, Role, ChatCompletionRequest
+from llmspec.llmspec import ChatCompletionRequest, ChatMessage, Role
 
 
 @pytest.fixture
