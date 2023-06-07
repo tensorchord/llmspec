@@ -1,6 +1,6 @@
 import pytest
 
-from llmspec.llmspec import ChatMessage, Role
+from llmspec.llmspec import ChatMessage, Role, ChatCompletionRequest
 
 
 @pytest.fixture
@@ -13,9 +13,36 @@ def messages():
 
 
 @pytest.mark.parametrize(
-    "messages,expected",
-    [],
+    "model,messages,expected",
+    [
+        ("thudm/chatglm", None, (
+            "[Round 0]\n"
+            "问：Who are you?\n"
+            "答：I'm a bot.\n"
+            "[Round 1]\n"
+            "问：Do you like English?\n"
+        )),
+        ("lmsys/vicuna", None, (
+            "USER: Who are you?\n"
+            "ASSISTANT: I'm a bot.</s>\n"
+            "USER: Do you like English?\n"
+            "ASSISTANT: "
+        )),
+        ("lmsys/fastchat", None, (
+            "USER: Who are you?\n### "
+            "ASSISTANT: I'm a bot.\n### "
+            "USER: Do you like English?\n### "
+            "ASSISTANT: "
+        )),
+        ("decapoda-research/llama", None, (
+            "USER: Who are you?\n"
+            "ASSISTANT: I'm a bot.\n"
+            "USER: Do you like English?\n"
+            "ASSISTANT: "
+        ))
+    ],
     indirect=["messages"],
 )
-def test_prompt_generation(messages, expected):
-    pass
+def test_chat_prompt_generation(model, messages, expected):
+    chat = ChatCompletionRequest(model=model, messages=messages)
+    assert chat.get_prompt(model) == expected

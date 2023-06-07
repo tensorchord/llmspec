@@ -69,9 +69,7 @@ class LanguageModelInfo(msgspec.Struct):
                 msg = self.assistant_msg_template.format(
                     role=self.assistant_token,
                     content=message.content,
-                    sep=self.assistant_sep_token
-                    if self.append_assistant_token
-                    else self.sep_token,
+                    sep=self.assistant_sep_token or self.sep_token,
                 )
             else:
                 msg = self.system_msg_template.format(
@@ -121,7 +119,8 @@ Vicuna = LanguageModelInfo(
     user_token="USER: ",
     assistant_token="ASSISTANT: ",
     system_token="",
-    sep_token="\n</s>",
+    sep_token="\n",
+    assistant_sep_token="</s>\n",
     append_assistant_token=True,
 )
 BloomZ = LanguageModelInfo(
