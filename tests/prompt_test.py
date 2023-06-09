@@ -39,6 +39,12 @@ def messages():
             "ASSISTANT: I'm a bot.\n"
             "USER: Do you like English?\n"
             "ASSISTANT: "
+        )),
+        ("tiiuae/falcon-7b-instruct", None, (
+            "User: Who are you?\n"
+            "Falcon: I'm a bot.\n"
+            "User: Do you like English?\n"
+            "Falcon: "
         ))
     ],
     indirect=["messages"],

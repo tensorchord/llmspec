@@ -130,7 +130,7 @@ FastChatT5 = LanguageModelInfo(
     tokenizer_cls="T5Tokenizer",
 )
 Falcon = LanguageModelInfo(
-    user_token="USER: ",
+    user_token="User: ",
     assistant_token="Falcon: ",
     sep_token="\n",
     append_assistant_token=True,
