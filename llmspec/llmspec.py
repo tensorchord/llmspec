@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import msgspec
 
@@ -40,9 +40,18 @@ class PromptCompletionRequest(CompletionRequest):
         return self.prompt
 
 
+class ChatFunction(msgspec.Struct):
+    name: str
+    description: Optional[str]
+    parameters: Optional[Dict[str, Any]]
+
+
 class ChatCompletionRequest(CompletionRequest):
     model: str
     messages: List[ChatMessage]
+    functions: Optional[List[ChatFunction]] = None
+    # default: "none" if `functions` is empty else "auto"
+    function_call: Optional[Union[str, Dict[str, str]]] = None
 
     def get_prompt(self, model: str):
         language_model = LanguageModels.find(model)
