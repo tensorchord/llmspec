@@ -29,6 +29,9 @@ class ChatMessage(msgspec.Struct):
 class LanguageModelInfo(msgspec.Struct):
     """Language model information."""
 
+    # identifier, will be used to match the model
+    name: str
+
     # token
     user_token: str = "USER: "
     assistant_token: str = "ASSISTANT: "
@@ -81,6 +84,7 @@ class LanguageModelInfo(msgspec.Struct):
 
 # ref to https://huggingface.co/THUDM/chatglm-6b/blob/main/modeling_chatglm.py#L1267
 ChatGLM = LanguageModelInfo(
+    name="thudm/chatglm",
     user_token="问：",
     assistant_token="答：",
     sep_token="\n",
@@ -89,6 +93,7 @@ ChatGLM = LanguageModelInfo(
     low_cpu_mem_usage=False,
 )
 MOSS = LanguageModelInfo(
+    name="fnlp/moss-moon",
     user_token="<|USER|>",
     assistant_token="<|ASSISTANT|>",
     system_token="<|SYSTEM|>",
@@ -97,18 +102,21 @@ MOSS = LanguageModelInfo(
     append_assistant_token=True,
 )
 StableLM = LanguageModelInfo(
+    name="stabilityai/stablelm",
     user_token="<|Human|>",
     assistant_token="<|StableLM|>",
     sep_token="\n",
     append_assistant_token=True,
 )
 LLaMA = LanguageModelInfo(
+    name="decapoda-research/llama",
     user_token="USER: ",
     assistant_token="ASSISTANT: ",
     sep_token="\n",
     append_assistant_token=True,
 )
 Vicuna = LanguageModelInfo(
+    name="lmsys/vicuna",
     user_token="USER: ",
     assistant_token="ASSISTANT: ",
     sep_token="\n",
@@ -116,12 +124,14 @@ Vicuna = LanguageModelInfo(
     append_assistant_token=True,
 )
 BloomZ = LanguageModelInfo(
+    name="bigscience/bloomz",
     user_token="USER: ",
     assistant_token="ASSISTANT: ",
     sep_token="\n",
     append_assistant_token=True,
 )
 FastChatT5 = LanguageModelInfo(
+    name="lmsys/fastchat",
     user_token="USER: ",
     assistant_token="ASSISTANT: ",
     sep_token="\n### ",
@@ -130,12 +140,15 @@ FastChatT5 = LanguageModelInfo(
     tokenizer_cls="T5Tokenizer",
 )
 Falcon = LanguageModelInfo(
+    name="tiiuae/falcon",
     user_token="User: ",
     assistant_token="Falcon: ",
     sep_token="\n",
     append_assistant_token=True,
 )
-Unknown = LanguageModelInfo()
+Unknown = LanguageModelInfo(
+    name="unknown",
+)
 
 
 class LanguageModels(Enum):
@@ -152,22 +165,10 @@ class LanguageModels(Enum):
 
     @classmethod
     def find(cls, name: str) -> LanguageModels:  # noqa: PLR0911
-        if name.lower().startswith("thudm/chatglm"):
-            return cls.CHAT_GLM
-        if name.lower().startswith("fnlp/moss-moon"):
-            return cls.MOSS
-        if name.lower().startswith("stabilityai/stablelm"):
-            return cls.STABLE_LM
-        if name.lower().startswith("bigscience/bloomz"):
-            return cls.BLOOM_Z
-        if name.lower().startswith("decapoda-research/llama"):
-            return cls.LLAMA
-        if name.lower().startswith("lmsys/vicuna"):
-            return cls.VICUNA
-        if name.lower().startswith("lmsys/fastchat"):
-            return cls.FASTCHATT5
-        if name.lower().startswith("tiiuae/falcon"):
-            return cls.FALCON
+        for item in cls:
+            if item.value.name in name.lower():
+                return item
+
         return cls.UNKNOWN
 
     @classmethod
