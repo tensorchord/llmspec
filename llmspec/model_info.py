@@ -43,7 +43,7 @@ class LanguageModelInfo(msgspec.Struct):
     # template
     user_msg_template: str = "{role}{content}{sep}"
     assistant_msg_template: str = "{role}{content}{sep}"
-    system_msg_template: str = "{content}{sep_token}"
+    system_msg_template: str = "{content}{sep}"
 
     # model class name in `transformers`
     transformer_model_cls: str = "AutoModelForCausalLM"
