@@ -144,11 +144,11 @@ class ChatResponse(LMResponse):
     def from_message(
         cls,
         message: str,
-        role: Role,
         model: str,
         finish_reason: str,
         prompt_token: int,
         completion_token: int,
+        role: Role = Role.ASSISTANT,
     ):
         return cls(
             id=str(uuid.uuid4()),
