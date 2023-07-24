@@ -34,16 +34,22 @@ class LanguageModelInfo(msgspec.Struct):
 
     # token
     user_token: str = "USER: "
+    user_token_end: str = ""
     assistant_token: str = "ASSISTANT: "
+    assistant_token_end: str = ""
     system_token: str = ""
+    system_token_end: str = ""
     sep_token: str = "\n"
     assistant_sep_token: str = ""
     append_assistant_token: bool = False
 
     # template
-    user_msg_template: str = "{role}{content}{sep}"
-    assistant_msg_template: str = "{role}{content}{sep}"
-    system_msg_template: str = "{content}{sep}"
+    user_msg_template: str = "{role}{content}{end}{sep}"
+    assistant_msg_template: str = "{role}{content}{end}{sep}"
+    system_msg_template: str = "{role}{content}{end}{sep}"
+
+    # default prompts
+    system_prompt: str = ""
 
     # model class name in `transformers`
     transformer_model_cls: str = "AutoModelForCausalLM"
@@ -53,6 +59,13 @@ class LanguageModelInfo(msgspec.Struct):
 
     def get_conversation_prompt(self, messages: List[ChatMessage]) -> str:
         """Get the prompt for a conversation using the specific tokens of the model."""
+        if self.system_prompt and messages and messages[0].role != Role.SYSTEM:
+            # prepend system prompt if the model has default system prompt and the
+            # first message is not from the system
+            messages = [
+                ChatMessage(content=self.system_prompt, role=Role.SYSTEM)
+            ] + messages
+
         formatted_messages = []
         round = -1
         for message in messages:
@@ -61,6 +74,7 @@ class LanguageModelInfo(msgspec.Struct):
                 msg = self.user_msg_template.format(
                     role=self.user_token,
                     content=message.content,
+                    end=self.user_token_end,
                     sep=self.sep_token,
                     round=round,
                 )
@@ -68,17 +82,23 @@ class LanguageModelInfo(msgspec.Struct):
                 msg = self.assistant_msg_template.format(
                     role=self.assistant_token,
                     content=message.content,
+                    end=self.assistant_token_end,
                     sep=self.assistant_sep_token or self.sep_token,
                 )
-            else:
+            elif message.role == Role.SYSTEM:
                 msg = self.system_msg_template.format(
+                    role=self.system_token,
                     content=message.content,
+                    end=self.system_token_end,
                     sep=self.sep_token,
                 )
             formatted_messages.append(msg)
+
         conversation = "".join(formatted_messages)
+
         if self.append_assistant_token:
             conversation += f"{self.assistant_token}"
+
         return conversation
 
 
@@ -114,6 +134,24 @@ LLaMA = LanguageModelInfo(
     assistant_token="ASSISTANT: ",
     sep_token="\n",
     append_assistant_token=True,
+)
+LLaMA2 = LanguageModelInfo(
+    name="meta-llama/llama-2",
+    user_token="[INST] ",
+    user_token_end=" [/INST]",
+    assistant_token=" ",
+    system_token="<<SYS>>\n",
+    system_token_end="\n<</SYS>>\n\n",
+    sep_token=" ",
+    system_prompt="""\
+You are a helpful, respectful and honest assistant. Always answer as helpfully as \
+possible, while being safe. Your answers should not include any harmful, unethical, \
+racist, sexist, toxic, dangerous, or illegal content. Please ensure that your \
+responses are socially unbiased and positive in nature.
+
+If a question does not make any sense, or is not factually coherent, explain why \
+instead of answering something not correct. If you don't know the answer to a \
+question, please don't share false information.""",
 )
 Vicuna = LanguageModelInfo(
     name="lmsys/vicuna",
@@ -157,6 +195,7 @@ class LanguageModels(Enum):
     STABLE_LM = StableLM
     BLOOM_Z = BloomZ
     LLAMA = LLaMA
+    LLAMA2 = LLaMA2
     VICUNA = Vicuna
     FASTCHATT5 = FastChatT5
     FALCON = Falcon
