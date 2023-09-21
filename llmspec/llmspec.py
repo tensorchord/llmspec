@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
@@ -121,7 +122,7 @@ class CompletionResponse(LMResponse):
         return cls(
             id=str(uuid.uuid4()),
             object="completion",
-            created=datetime.now(),
+            created=int(time.time()),
             model=model,
             choices=[
                 CompletionChoice(
@@ -153,7 +154,7 @@ class ChatResponse(LMResponse):
         return cls(
             id=str(uuid.uuid4()),
             object="chat",
-            created=datetime.now(),
+            created=int(time.time()),
             model=model,
             choices=[
                 ChatChoice(
