@@ -122,7 +122,7 @@ class CompletionResponse(LMResponse):
         return cls(
             id=str(uuid.uuid4()),
             object="completion",
-            created=int(time.time() * 1000),
+            created=int(time.time()),
             model=model,
             choices=[
                 CompletionChoice(
@@ -154,7 +154,7 @@ class ChatResponse(LMResponse):
         return cls(
             id=str(uuid.uuid4()),
             object="chat",
-            created=int(time.time() * 1000),
+            created=int(time.time()),
             model=model,
             choices=[
                 ChatChoice(
