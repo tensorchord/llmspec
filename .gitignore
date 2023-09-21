@@ -161,3 +161,4 @@ cython_debug/
 .pdm-python
 .pdm-build
 .ruff_cache/
+llmspec/__version__.py
