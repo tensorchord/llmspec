@@ -180,9 +180,11 @@ class ChatResponse(LMResponse):
 
 class EmbeddingRequest(msgspec.Struct, JSONSerializableMixin):
     model: str
-    input: Union[str, List[str], List[List[int]]]
-    user: str = ""
-    encoding_format: str = "float"
+    # this is not strict correct, but in Python,
+    # "Type unions may not contain more than one array-like type"
+    input: Union[str, List[Union[str, List[int]]]]
+    user: Optional[str] = ""
+    encoding_format: Optional[str] = "float"
 
 
 class EmbeddingData(msgspec.Struct):
