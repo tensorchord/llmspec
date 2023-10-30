@@ -85,8 +85,8 @@ question, please don't share false information.
                 " [INST] Who are you? [/INST] "
                 " I'm a bot."
                 " [INST] Do you like English? [/INST] "
-            )
-        )
+            ),
+        ),
     ],
     indirect=["messages"],
 )
