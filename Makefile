@@ -1,4 +1,4 @@
-PY_SOURCE=llmspec
+PY_SOURCE=llmspec tests
 
 .DEFAULT_GOAL:=build
 
@@ -6,12 +6,10 @@ build:
 	@pdm build
 
 lint:
-	@black --check --diff ${PY_SOURCE}
-	@ruff check .
+	@ruff check ${PY_SOURCE}
 
 format:
-	@black ${PY_SOURCE}
-	@ruff check --fix .
+	@ruff format ${PY_SOURCE}
 
 test:
 	@pytest -vv -s

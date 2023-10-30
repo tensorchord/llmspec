@@ -34,15 +34,11 @@ test = [
     "pytest>=7.3.1",
 ]
 [tool.pdm.scripts]
-black = "black --check llmspec"
-ruff = "ruff check ."
-lint = { composite = ["black", "ruff"] }
+lint = "ruff check ."
+format = "ruff format ."
 
 [tool.ruff]
 line-length = 88
 select = ["E", "F", "B", "I", "SIM", "TID", "PL"]
 [tool.ruff.pylint]
 max-args = 7
-
-[tool.black]
-line-length = 88

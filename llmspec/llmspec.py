@@ -1,3 +1,8 @@
+"""
+Reference:
+- https://platform.openai.com/docs/api-reference
+"""
+
 from __future__ import annotations
 
 import time
@@ -174,10 +179,10 @@ class ChatResponse(LMResponse):
 
 
 class EmbeddingRequest(msgspec.Struct, JSONSerializableMixin):
-    model: str = ""
-    input: Union[str, List[str]] = None
+    model: str
+    input: Union[str, List[str], List[List[int]]]
     user: str = ""
-    encoding_format: str = "json"
+    encoding_format: str = "float"
 
 
 class EmbeddingData(msgspec.Struct):
